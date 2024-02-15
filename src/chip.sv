@@ -7,41 +7,29 @@ module my_chip (
     input logic reset // Important: Reset is ACTIVE-HIGH
 );
     
-    // Basic counter design as an example
+    logic[9:0]  data_in;
+    logic       go;
+    logic       finish;
 
+    logic[9:0]  range;
+    logic       debug_error;
 
-    wire [6:0] led_out;
-    assign io_out[6:0] = led_out;
+    assign data_in  = io_in[9:0];
+    assign go       = io_in[10];
+    assign finish   = io_in[11];
 
-    // external clock is 1000Hz, so need 10 bit counter
-    reg [9:0] second_counter;
-    reg [3:0] digit;
+    assign io_out[9:0]  = range;
+    assign io_out[10]   = debug_error;
+    assign io_out[11]   = 1'b0; 
 
-    always @(posedge clock) begin
-        // if reset, set counter to 0
-        if (reset) begin
-            second_counter <= 0;
-            digit <= 0;
-        end else begin
-            // if up to 16e6
-            if (second_counter == 1000) begin
-                // reset
-                second_counter <= 0;
-
-                // increment digit
-                digit <= digit + 1'b1;
-
-                // only count from 0 to 9
-                if (digit == 9)
-                    digit <= 0;
-
-            end else
-                // increment counter
-                second_counter <= second_counter + 1'b1;
-        end
-    end
-
-    // instantiate segment display
-    seg7 seg7(.counter(digit), .segments(led_out));
+    RangeFinder # (10) inst (
+        .data_in,
+        .clock,
+        .reset,
+        .go,
+        .finish,
+        .range,
+        .debug_error
+    );
 
 endmodule
