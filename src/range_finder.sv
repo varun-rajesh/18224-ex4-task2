@@ -64,6 +64,10 @@ module RangeFinder
                 if (go & ~finish) next_state = RUN;
                 else    next_state = ERROR;
             end
+
+            default: begin
+                next_state = IDLE;
+            end
         endcase
     end
 
